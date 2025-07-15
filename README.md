@@ -1,4 +1,4 @@
-# iOS-Style Drawer Stack
+# iOS Card-Style Drawer Stack
 
 A React component for creating iOS-style stacked drawer navigation using React Router and Vaul.
 
