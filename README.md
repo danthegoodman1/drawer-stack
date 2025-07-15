@@ -4,6 +4,8 @@ A React component for creating iOS-style stacked drawer navigation using React R
 
 Works in tandem with normal navigation - use full-page navigation for primary flows, or peek at routes with stackable drawers for quick previews.
 
+Demo: https://x.com/Dan_The_Goodman/status/1938357207424503843
+
 ## Features
 
 - 🔗 **Works with existing React Router** - No special changes needed to your routes or components, just a root layout
