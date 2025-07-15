@@ -1,0 +1,57 @@
+{
+  "name": "drawer-stack",
+  "version": "0.0.2",
+  "type": "module",
+  "description": "Drawer stack for React",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "react",
+    "drawer",
+    "stack",
+    "navigation"
+  ],
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-router": ">=6.0.0"
+  },
+  "dependencies": {
+    "vaul": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.1.8",
+    "react": "^19.1.0",
+    "react-router": "^7.6.3",
+    "tsx": "^4.19.0",
+    "typescript": "~5.8.0"
+  },
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "pub": "npm publish --access public"
+  },
+  "author": "danthegoodman1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danthegoodman1/drawer-stack"
+  },
+  "homepage": "https://github.com/danthegoodman1/drawer-stack#readme",
+  "bugs": {
+    "url": "https://github.com/danthegoodman1/drawer-stack/issues"
+  },
+  "license": "ISC"
+}
