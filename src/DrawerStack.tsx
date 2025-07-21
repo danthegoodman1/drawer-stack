@@ -1,6 +1,6 @@
 import { Drawer } from "vaul"
 import { useDrawerStack } from "./useDrawerStack"
-import { useEffect, useState, cloneElement } from "react"
+import { useEffect, useState } from "react"
 import { findRouteAndMatch, flattenRoutes } from "./routeUtils"
 import {
   type RouteObject,
