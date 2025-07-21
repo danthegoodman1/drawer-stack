@@ -1,6 +1,6 @@
 import { Drawer } from "vaul"
 import { useDrawerStack } from "./useDrawerStack"
-import { useEffect, useState } from "react"
+import { useEffect, useState, cloneElement } from "react"
 import { findRouteAndMatch, flattenRoutes } from "./routeUtils"
 import {
   type RouteObject,
@@ -13,6 +13,8 @@ interface DrawerStackProps {
   STACK_SQUEEZE?: number
   closeButton?: React.ComponentType<{ onClick: () => void }>
   height?: string
+  backgroundColor?: string
+  borderRadius?: string
 }
 
 interface DrawerContentProps {
@@ -89,27 +91,14 @@ function DrawerContent({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header with navigation */}
-      <div className="flex items-center justify-between p-4  bg-white">
-        {/* <div className="flex-1 text-center">
-          <h1 className="font-medium text-sm">{path}</h1>
-        </div> */}
-        {CloseButton ? (
-          <CloseButton onClick={onClose} />
-        ) : (
-          <button
-            onClick={onClose}
-            className="text-gray-500 text-sm hover:text-gray-600 ml-auto"
-          >
-            Close
-          </button>
-        )}
-      </div>
+      {CloseButton && <CloseButton onClick={onClose} />}
 
       {/* Route Content */}
-      <RouteContext.Provider value={routeContextValue}>
-        {route.element}
-      </RouteContext.Provider>
+      <div className="flex-1 overflow-y-auto">
+        <RouteContext.Provider value={routeContextValue}>
+          {route.element}
+        </RouteContext.Provider>
+      </div>
     </div>
   )
 }
@@ -120,6 +109,8 @@ export function DrawerStack({
   STACK_SQUEEZE = 0.04,
   closeButton,
   height = "85%",
+  backgroundColor = "white",
+  borderRadius = "10px",
 }: DrawerStackProps) {
   const { drawerStack, hasDrawers, popDrawer, closeAllDrawers, pushDrawer } =
     useDrawerStack()
@@ -219,8 +210,11 @@ export function DrawerStack({
                 style={{ zIndex: zIndex }}
               />
               <Drawer.Content
-                className="bg-white flex flex-col rounded-t-[10px] mt-24 fixed bottom-0 left-0 right-0"
+                className="flex flex-col mt-24 fixed bottom-0 left-0 right-0"
                 style={{
+                  borderTopRightRadius: borderRadius,
+                  borderTopLeftRadius: borderRadius,
+                  backgroundColor: backgroundColor,
                   height: height,
                   zIndex: zIndex + 1,
                   // If closing or dragging, don't apply any custom transforms - let Vaul handle it
