@@ -1,4 +1,4 @@
-import { type RouteObject, matchPath } from "react-router"
+import { type RouteObject, matchPath, type PathMatch } from "react-router"
 
 // Flatten nested routes for easier matching in drawers
 export const flattenRoutes = (
@@ -31,19 +31,19 @@ export const flattenRoutes = (
   return flattened
 }
 
-// Find a route by path in a flattened route array
-export const findRouteByPath = (
+// Find a route and its match data by path in a flattened route array
+export const findRouteAndMatch = (
   path: string,
   routes: RouteObject[]
-): RouteObject | undefined => {
-  return routes.find((route) => {
-    if (!route.path) return false
+): { route: RouteObject; match: PathMatch } | undefined => {
+  for (const route of routes) {
+    if (!route.path) continue
 
-    // Exact match
-    if (route.path === path) return true
-
-    // Try matching with React Router's matching logic
-    const match = matchPath({ path: route.path }, path)
-    return match !== null
-  })
+    // Use end: true to ensure we match the exact path and not a partial parent path.
+    const match = matchPath({ path: route.path, end: true }, path)
+    if (match) {
+      return { route, match }
+    }
+  }
+  return undefined
 }

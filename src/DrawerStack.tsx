@@ -1,8 +1,11 @@
 import { Drawer } from "vaul"
 import { useDrawerStack } from "./useDrawerStack"
-import { useEffect, useState, cloneElement } from "react"
-import { findRouteByPath, flattenRoutes } from "./routeUtils"
-import { type RouteObject } from "react-router"
+import { useEffect, useState } from "react"
+import { findRouteAndMatch, flattenRoutes } from "./routeUtils"
+import {
+  type RouteObject,
+  UNSAFE_RouteContext as RouteContext,
+} from "react-router"
 
 interface DrawerStackProps {
   routes: RouteObject[]
@@ -51,9 +54,9 @@ function DrawerContent({
   }
 
   const flatRoutes = flattenRoutes(routes)
-  const route = findRouteByPath(path, flatRoutes)
+  const result = findRouteAndMatch(path, flatRoutes)
 
-  if (!route || !route.element) {
+  if (!result || !result.route.element) {
     return (
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between p-4">
@@ -67,6 +70,21 @@ function DrawerContent({
         </div>
       </div>
     )
+  }
+
+  const { route, match } = result
+
+  const routeContextValue = {
+    outlet: null,
+    matches: [
+      {
+        params: match.params,
+        pathname: match.pathname,
+        pathnameBase: match.pathname,
+        route: route,
+      },
+    ],
+    isDataRoute: false,
   }
 
   return (
@@ -89,10 +107,9 @@ function DrawerContent({
       </div>
 
       {/* Route Content */}
-      <div className="flex-1 overflow-auto">
-        {/* Render the actual route component */}
-        {cloneElement(route.element as React.ReactElement)}
-      </div>
+      <RouteContext.Provider value={routeContextValue}>
+        {route.element}
+      </RouteContext.Provider>
     </div>
   )
 }
