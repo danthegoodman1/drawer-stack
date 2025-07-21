@@ -15,6 +15,7 @@ interface DrawerStackProps {
   height?: string
   backgroundColor?: string
   borderRadius?: string
+  handleClassName?: string
 }
 
 interface DrawerContentProps {
@@ -24,6 +25,7 @@ interface DrawerContentProps {
   onNavigateInDrawer?: (path: string) => void
   routes: RouteObject[]
   closeButton?: React.ComponentType<{ onClick: () => void }>
+  borderRadius?: string
 }
 
 // This component renders route components inside drawers
@@ -34,6 +36,7 @@ function DrawerContent({
   onNavigateInDrawer,
   routes,
   closeButton: CloseButton,
+  borderRadius,
 }: DrawerContentProps) {
   // Ignore root route to prevent recursive rendering
   if (path === "/") {
@@ -90,11 +93,17 @@ function DrawerContent({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
       {CloseButton && <CloseButton onClick={onClose} />}
 
       {/* Route Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div
+        className="overflow-x-auto"
+        style={{
+          borderTopLeftRadius: borderRadius,
+          borderTopRightRadius: borderRadius,
+        }}
+      >
         <RouteContext.Provider value={routeContextValue}>
           {route.element}
         </RouteContext.Provider>
@@ -111,6 +120,7 @@ export function DrawerStack({
   height = "85%",
   backgroundColor = "white",
   borderRadius = "10px",
+  handleClassName,
 }: DrawerStackProps) {
   const { drawerStack, hasDrawers, popDrawer, closeAllDrawers, pushDrawer } =
     useDrawerStack()
@@ -236,7 +246,10 @@ export function DrawerStack({
                       : "transform 300ms ease-out",
                 }}
               >
-                <Drawer.Handle className="!w-12 !h-1.5 !bg-gray-400 mt-3" />
+                {/* "!w-12 !h-1.5 !bg-gray-400 mt-3" */}
+                {handleClassName && (
+                  <Drawer.Handle className={handleClassName} />
+                )}
                 <DrawerContent
                   path={drawer.path}
                   level={drawer.level}
@@ -244,6 +257,7 @@ export function DrawerStack({
                   onNavigateInDrawer={handleNavigateInDrawer}
                   routes={routes}
                   closeButton={closeButton}
+                  borderRadius={borderRadius}
                 />
               </Drawer.Content>
             </Drawer.Portal>
