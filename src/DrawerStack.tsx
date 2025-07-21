@@ -1,13 +1,15 @@
 import { Drawer } from "vaul"
-import { useDrawerStack } from "./useDrawerStack.js"
+import { useDrawerStack } from "./useDrawerStack"
 import { useEffect, useState, cloneElement } from "react"
-import { findRouteByPath, flattenRoutes } from "./routeUtils.js"
+import { findRouteByPath, flattenRoutes } from "./routeUtils"
 import { type RouteObject } from "react-router"
 
 interface DrawerStackProps {
   routes: RouteObject[]
   STACK_GAP?: number
   STACK_SQUEEZE?: number
+  closeButton?: React.ComponentType<{ onClick: () => void }>
+  height?: string
 }
 
 interface DrawerContentProps {
@@ -16,6 +18,7 @@ interface DrawerContentProps {
   onClose: () => void
   onNavigateInDrawer?: (path: string) => void
   routes: RouteObject[]
+  closeButton?: React.ComponentType<{ onClick: () => void }>
 }
 
 // This component renders route components inside drawers
@@ -25,21 +28,17 @@ function DrawerContent({
   onClose,
   onNavigateInDrawer,
   routes,
+  closeButton: CloseButton,
 }: DrawerContentProps) {
   // Ignore root route to prevent recursive rendering
   if (path === "/") {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4">
           <div className="flex-1 text-center">
             <h1 className="font-medium">Root Route</h1>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 text-sm hover:text-gray-600"
-          >
-            Close
-          </button>
+          {CloseButton && <CloseButton onClick={onClose} />}
         </div>
         <div className="flex-1 overflow-auto p-4">
           <p>The root route cannot be displayed in a drawer.</p>
@@ -57,16 +56,11 @@ function DrawerContent({
   if (!route || !route.element) {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4">
           <div className="flex-1 text-center">
             <h1 className="font-medium">Not Found</h1>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 text-sm hover:text-gray-600"
-          >
-            Close
-          </button>
+          {CloseButton && <CloseButton onClick={onClose} />}
         </div>
         <div className="flex-1 overflow-auto p-4">
           <p>No route found for path: {path}</p>
@@ -78,26 +72,20 @@ function DrawerContent({
   return (
     <div className="flex flex-col h-full">
       {/* Header with navigation */}
-      <div className="flex items-center justify-between p-4 border-b bg-white shadow-sm">
-        <div className="flex items-center gap-2">
-          {level > 0 && onNavigateInDrawer && (
-            <button
-              onClick={() => onNavigateInDrawer("/somepage")}
-              className="text-blue-500 text-sm hover:text-blue-600 flex items-center gap-1"
-            >
-              ← Navigate
-            </button>
-          )}
-        </div>
-        <div className="flex-1 text-center">
+      <div className="flex items-center justify-between p-4  bg-white">
+        {/* <div className="flex-1 text-center">
           <h1 className="font-medium text-sm">{path}</h1>
-        </div>
-        <button
-          onClick={onClose}
-          className="text-gray-500 text-sm hover:text-gray-600"
-        >
-          Close
-        </button>
+        </div> */}
+        {CloseButton ? (
+          <CloseButton onClick={onClose} />
+        ) : (
+          <button
+            onClick={onClose}
+            className="text-gray-500 text-sm hover:text-gray-600 ml-auto"
+          >
+            Close
+          </button>
+        )}
       </div>
 
       {/* Route Content */}
@@ -113,6 +101,8 @@ export function DrawerStack({
   routes,
   STACK_GAP = 40,
   STACK_SQUEEZE = 0.04,
+  closeButton,
+  height = "85%",
 }: DrawerStackProps) {
   const { drawerStack, hasDrawers, popDrawer, closeAllDrawers, pushDrawer } =
     useDrawerStack()
@@ -212,8 +202,9 @@ export function DrawerStack({
                 style={{ zIndex: zIndex }}
               />
               <Drawer.Content
-                className="bg-white flex flex-col rounded-t-[10px] h-[85%] mt-24 fixed bottom-0 left-0 right-0"
+                className="bg-white flex flex-col rounded-t-[10px] mt-24 fixed bottom-0 left-0 right-0"
                 style={{
+                  height: height,
                   zIndex: zIndex + 1,
                   // If closing or dragging, don't apply any custom transforms - let Vaul handle it
                   transform:
@@ -241,6 +232,7 @@ export function DrawerStack({
                   onClose={() => handleDrawerClose(index)}
                   onNavigateInDrawer={handleNavigateInDrawer}
                   routes={routes}
+                  closeButton={closeButton}
                 />
               </Drawer.Content>
             </Drawer.Portal>
