@@ -31,9 +31,9 @@ interface DrawerContentProps {
 // This component renders route components inside drawers
 function DrawerContent({
   path,
-  level,
+  // level,
   onClose,
-  onNavigateInDrawer,
+  // onNavigateInDrawer,
   routes,
   closeButton: CloseButton,
   borderRadius,
@@ -201,11 +201,11 @@ export function DrawerStack({
               }
             }}
             handleOnly={true}
-            onDrag={(event, percentageDragged) => {
+            onDrag={() => { // event, percentageDragged
               // Mark as dragging when drag starts
               setDraggingDrawers((prev) => new Set([...prev, index]))
             }}
-            onRelease={(event, open) => {
+            onRelease={() => { // event, open
               // Remove from dragging state when released
               setDraggingDrawers((prev) => {
                 const newSet = new Set(prev)
@@ -227,6 +227,8 @@ export function DrawerStack({
                   backgroundColor: backgroundColor,
                   height: height,
                   zIndex: zIndex + 1,
+                  // Remove focus ring
+                  outline: 'none',
                   // If closing or dragging, don't apply any custom transforms - let Vaul handle it
                   transform:
                     isClosing || isDragging
