@@ -1,11 +1,20 @@
 import { Drawer } from "vaul"
 import { useDrawerStack } from "./useDrawerStack"
-import { useEffect, useState } from "react"
+import { useEffect, useState, createContext, useContext } from "react"
 import { findRouteAndMatch, flattenRoutes } from "./routeUtils"
 import {
   type RouteObject,
   UNSAFE_RouteContext as RouteContext,
 } from "react-router"
+
+// Context for drawer search parameters
+const DrawerSearchParamsContext = createContext<URLSearchParams | null>(null)
+
+// Hook to access drawer search parameters
+export const useDrawerSearchParams = (): URLSearchParams => {
+  const drawerSearchParams = useContext(DrawerSearchParamsContext)
+  return drawerSearchParams || new URLSearchParams()
+}
 
 interface DrawerStackProps {
   routes: RouteObject[]
@@ -79,6 +88,10 @@ function DrawerContent({
 
   const { route, match } = result
 
+  // Parse search parameters from the drawer path
+  const [, drawerSearch] = path.split("?")
+  const drawerSearchParams = new URLSearchParams(drawerSearch || "")
+
   const routeContextValue = {
     outlet: null,
     matches: [
@@ -104,9 +117,11 @@ function DrawerContent({
           borderTopRightRadius: borderRadius,
         }}
       >
-        <RouteContext.Provider value={routeContextValue}>
-          {route.element}
-        </RouteContext.Provider>
+        <DrawerSearchParamsContext.Provider value={drawerSearchParams}>
+          <RouteContext.Provider value={routeContextValue}>
+            {route.element}
+          </RouteContext.Provider>
+        </DrawerSearchParamsContext.Provider>
       </div>
     </div>
   )
