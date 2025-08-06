@@ -93,12 +93,12 @@ function DrawerContent({
   }
 
   return (
-    <div className="flex flex-col h-full relative">
+    <div className="flex flex-col h-full flex-1 min-h-0 relative">
       {CloseButton && <CloseButton onClick={onClose} />}
 
       {/* Route Content */}
       <div
-        className="overflow-x-auto"
+        className="overflow-x-auto flex-1"
         style={{
           borderTopLeftRadius: borderRadius,
           borderTopRightRadius: borderRadius,
@@ -201,11 +201,13 @@ export function DrawerStack({
               }
             }}
             handleOnly={true}
-            onDrag={() => { // event, percentageDragged
+            onDrag={() => {
+              // event, percentageDragged
               // Mark as dragging when drag starts
               setDraggingDrawers((prev) => new Set([...prev, index]))
             }}
-            onRelease={() => { // event, open
+            onRelease={() => {
+              // event, open
               // Remove from dragging state when released
               setDraggingDrawers((prev) => {
                 const newSet = new Set(prev)
@@ -228,7 +230,7 @@ export function DrawerStack({
                   height: height,
                   zIndex: zIndex + 1,
                   // Remove focus ring
-                  outline: 'none',
+                  outline: "none",
                   // If closing or dragging, don't apply any custom transforms - let Vaul handle it
                   transform:
                     isClosing || isDragging
@@ -252,15 +254,18 @@ export function DrawerStack({
                 {handleClassName && (
                   <Drawer.Handle className={handleClassName} />
                 )}
-                <DrawerContent
-                  path={drawer.path}
-                  level={drawer.level}
-                  onClose={() => handleDrawerClose(index)}
-                  onNavigateInDrawer={handleNavigateInDrawer}
-                  routes={routes}
-                  closeButton={closeButton}
-                  borderRadius={borderRadius}
-                />
+                {/* let this area take all remaining height */}
+                <div className="flex-1 min-h-0">
+                  <DrawerContent
+                    path={drawer.path}
+                    level={drawer.level}
+                    onClose={() => handleDrawerClose(index)}
+                    onNavigateInDrawer={handleNavigateInDrawer}
+                    routes={routes}
+                    closeButton={closeButton}
+                    borderRadius={borderRadius}
+                  />
+                </div>
               </Drawer.Content>
             </Drawer.Portal>
           </Drawer.Root>

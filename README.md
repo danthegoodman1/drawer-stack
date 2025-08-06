@@ -172,4 +172,5 @@ navigate('/profile')
 - **Performance**: Only open drawers are rendered, so having many routes doesn't impact performance
 - **Accessibility**: Drawers include proper focus management and keyboard navigation
 - **Mobile-first**: Designed for touch interactions but works great on desktop too
-- **URL sharing**: Drawer state is preserved in the URL, so users can bookmark or share stacked states 
+- **URL sharing**: Drawer state is preserved in the URL, so users can bookmark or share stacked states
+- **Fill available space**: You can simply use `h-full` to fill available space with your top-level element
