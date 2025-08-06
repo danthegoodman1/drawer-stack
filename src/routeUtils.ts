@@ -36,11 +36,14 @@ export const findRouteAndMatch = (
   path: string,
   routes: RouteObject[]
 ): { route: RouteObject; match: PathMatch } | undefined => {
+  // Extract just the pathname without query parameters for route matching
+  const pathname = path.split("?")[0]
+
   for (const route of routes) {
     if (!route.path) continue
 
     // Use end: true to ensure we match the exact path and not a partial parent path.
-    const match = matchPath({ path: route.path, end: true }, path)
+    const match = matchPath({ path: route.path, end: true }, pathname)
     if (match) {
       return { route, match }
     }
