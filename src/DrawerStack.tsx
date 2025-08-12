@@ -10,6 +10,12 @@ import {
 // Context for drawer search parameters
 const DrawerSearchParamsContext = createContext<URLSearchParams | null>(null)
 
+// Context to expose the scrollable container element for the drawer content
+const DrawerScrollContainerContext = createContext<HTMLDivElement | null>(null)
+
+export const useDrawerScrollContainerRef = () =>
+  useContext(DrawerScrollContainerContext)
+
 // Hook to access drawer search parameters
 export const useDrawerSearchParams = (): URLSearchParams => {
   const drawerSearchParams = useContext(DrawerSearchParamsContext)
@@ -47,6 +53,8 @@ function DrawerContent({
   closeButton: CloseButton,
   borderRadius,
 }: DrawerContentProps) {
+  const [scrollContainerEl, setScrollContainerEl] =
+    useState<HTMLDivElement | null>(null)
   // Ignore root route to prevent recursive rendering
   if (path === "/") {
     return (
@@ -111,16 +119,19 @@ function DrawerContent({
 
       {/* Route Content */}
       <div
-        className="overflow-x-auto flex-1"
+        className="overflow-x-auto overflow-y-auto flex-1"
         style={{
           borderTopLeftRadius: borderRadius,
           borderTopRightRadius: borderRadius,
         }}
+        ref={setScrollContainerEl}
       >
         <DrawerSearchParamsContext.Provider value={drawerSearchParams}>
-          <RouteContext.Provider value={routeContextValue}>
-            {route.element}
-          </RouteContext.Provider>
+          <DrawerScrollContainerContext.Provider value={scrollContainerEl}>
+            <RouteContext.Provider value={routeContextValue}>
+              {route.element}
+            </RouteContext.Provider>
+          </DrawerScrollContainerContext.Provider>
         </DrawerSearchParamsContext.Provider>
       </div>
     </div>

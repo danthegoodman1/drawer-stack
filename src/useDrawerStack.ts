@@ -31,7 +31,8 @@ export function useDrawerStack() {
 
   // Push a new drawer onto the stack
   const pushDrawer = useCallback(
-    (path: string, title?: string) => {
+    (path: string) => {
+      // , title?: string
       // Always read current URL state to ensure proper stacking
       const currentSearchParams = new URLSearchParams(window.location.search)
       currentSearchParams.append("drawer", path)
@@ -82,6 +83,37 @@ export function useDrawerStack() {
     )
   }, [searchParams, navigate, location.pathname])
 
+  // Replace the current top drawer with a new path
+  const replaceDrawer = useCallback(
+    (path: string) => {
+      const drawerParams = searchParams.getAll("drawer")
+      const newSearchParams = new URLSearchParams(searchParams)
+
+      // Remove all drawer params
+      newSearchParams.delete("drawer")
+
+      if (drawerParams.length === 0) {
+        // No drawers exist, just add the new one
+        newSearchParams.append("drawer", path)
+      } else {
+        // Replace the top drawer: keep all but the last, then add the new path
+        drawerParams.slice(0, -1).forEach((drawerPath) => {
+          newSearchParams.append("drawer", drawerPath)
+        })
+        newSearchParams.append("drawer", path)
+      }
+
+      navigate(
+        {
+          pathname: location.pathname,
+          search: newSearchParams.toString(),
+        },
+        { replace: false }
+      )
+    },
+    [searchParams, navigate, location.pathname]
+  )
+
   // Replace the entire drawer stack
   const replaceDrawerStack = useCallback(
     (paths: string[]) => {
@@ -108,6 +140,7 @@ export function useDrawerStack() {
     currentDrawer,
     pushDrawer,
     popDrawer,
+    replaceDrawer,
     closeAllDrawers,
     replaceDrawerStack,
   }
