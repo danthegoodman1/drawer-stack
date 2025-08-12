@@ -148,8 +148,13 @@ export function DrawerStack({
   borderRadius = "10px",
   handleClassName,
 }: DrawerStackProps) {
-  const { drawerStack, hasDrawers, popDrawer, closeAllDrawers, pushDrawer } =
-    useDrawerStack()
+  const {
+    drawerStack,
+    hasDrawers,
+    popDrawerInternal,
+    closeAllDrawers,
+    pushDrawer,
+  } = useDrawerStack()
   const [openDrawers, setOpenDrawers] = useState<boolean[]>([])
   const [closingDrawers, setClosingDrawers] = useState<Set<number>>(new Set())
   const [draggingDrawers, setDraggingDrawers] = useState<Set<number>>(new Set())
@@ -175,7 +180,7 @@ export function DrawerStack({
     setTimeout(() => {
       if (level === drawerStack.length - 1) {
         // Closing the top drawer
-        popDrawer()
+        popDrawerInternal()
       } else {
         // Closing a drawer in the middle - close all above it
         closeAllDrawers()
@@ -191,6 +196,27 @@ export function DrawerStack({
       }, 50)
     }, 300)
   }
+
+  // Listen for animated close events
+  useEffect(() => {
+    const handlePopDrawerAnimated = (event: CustomEvent) => {
+      const { level } = event.detail
+      if (level >= 0 && level < drawerStack.length) {
+        handleDrawerClose(level)
+      }
+    }
+
+    window.addEventListener(
+      "popDrawerAnimated",
+      handlePopDrawerAnimated as EventListener
+    )
+    return () => {
+      window.removeEventListener(
+        "popDrawerAnimated",
+        handlePopDrawerAnimated as EventListener
+      )
+    }
+  }, [drawerStack.length, handleDrawerClose])
 
   // Handle navigation within drawers
   const handleNavigateInDrawer = (path: string) => {
@@ -274,6 +300,38 @@ export function DrawerStack({
                     isClosing || isDragging
                       ? "none"
                       : "transform 300ms ease-out",
+                }}
+                onPointerDownOutside={(event: any) => {
+                  const toastContainer = document.querySelector(
+                    "[data-toast-container]"
+                  ) as HTMLElement | null
+                  const originalTarget =
+                    event?.target ||
+                    event?.originalEvent?.target ||
+                    event?.detail?.originalEvent?.target
+                  if (
+                    toastContainer &&
+                    originalTarget &&
+                    toastContainer.contains(originalTarget as Node)
+                  ) {
+                    event.preventDefault()
+                  }
+                }}
+                onInteractOutside={(event: any) => {
+                  const toastContainer = document.querySelector(
+                    "[data-toast-container]"
+                  ) as HTMLElement | null
+                  const originalTarget =
+                    event?.target ||
+                    event?.originalEvent?.target ||
+                    event?.detail?.originalEvent?.target
+                  if (
+                    toastContainer &&
+                    originalTarget &&
+                    toastContainer.contains(originalTarget as Node)
+                  ) {
+                    event.preventDefault()
+                  }
                 }}
               >
                 {/* "!w-12 !h-1.5 !bg-gray-400 mt-3" */}

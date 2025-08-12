@@ -48,8 +48,8 @@ export function useDrawerStack() {
     [navigate, location.pathname]
   )
 
-  // Pop the top drawer from the stack
-  const popDrawer = useCallback(() => {
+  // Internal function to actually update the URL (used by DrawerStack after animation)
+  const popDrawerInternal = useCallback(() => {
     const drawerParams = searchParams.getAll("drawer")
     if (drawerParams.length === 0) return
 
@@ -68,6 +68,18 @@ export function useDrawerStack() {
       { replace: false }
     )
   }, [searchParams, navigate, location.pathname])
+
+  // Pop the top drawer from the stack with animation
+  const popDrawer = useCallback(() => {
+    if (drawerStack.length === 0) return
+
+    // Dispatch a custom event that DrawerStack can listen to for animated close
+    window.dispatchEvent(
+      new CustomEvent("popDrawerAnimated", {
+        detail: { level: drawerStack.length - 1 },
+      })
+    )
+  }, [drawerStack.length])
 
   // Close all drawers
   const closeAllDrawers = useCallback(() => {
@@ -140,6 +152,7 @@ export function useDrawerStack() {
     currentDrawer,
     pushDrawer,
     popDrawer,
+    popDrawerInternal, // For DrawerStack to use after animation
     replaceDrawer,
     closeAllDrawers,
     replaceDrawerStack,
