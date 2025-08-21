@@ -1,4 +1,4 @@
-import { Drawer } from "vaul"
+import { Drawer } from "./CustomVerticalDrawer"
 import { useDrawerStack } from "./useDrawerStack"
 import { useEffect, useState, createContext, useContext } from "react"
 import { findRouteAndMatch, flattenRoutes } from "./routeUtils"
@@ -161,13 +161,44 @@ export function DrawerStack({
 
   // Sync open state with drawer stack
   useEffect(() => {
-    setOpenDrawers(drawerStack.map(() => true))
+    setOpenDrawers((prev) => {
+      // If we're adding drawers, keep existing states and add new ones as closed initially
+      if (drawerStack.length > prev.length) {
+        const newStates = [...prev]
+        for (let i = prev.length; i < drawerStack.length; i++) {
+          newStates[i] = false // Start closed, will animate open
+        }
+
+        // Schedule opening animation after a frame
+        setTimeout(() => {
+          setOpenDrawers((current) => {
+            const opened = [...current]
+            for (let i = prev.length; i < drawerStack.length; i++) {
+              opened[i] = true
+            }
+            return opened
+          })
+        }, 10)
+
+        return newStates
+      }
+      // If we're removing drawers, truncate the array
+      else if (drawerStack.length < prev.length) {
+        const newStates = prev.slice(0, drawerStack.length)
+        return newStates
+      }
+      // No change in length
+      return prev
+    })
   }, [drawerStack.length])
 
   // Handle drawer close with animation delay
   const handleDrawerClose = (level: number) => {
     // Mark this drawer as closing immediately so other drawers can start moving
-    setClosingDrawers((prev) => new Set([...prev, level]))
+    setClosingDrawers((prev) => {
+      const newSet = new Set([...prev, level])
+      return newSet
+    })
 
     // Set the drawer as closed to trigger exit animation
     setOpenDrawers((prev) => {
@@ -176,7 +207,7 @@ export function DrawerStack({
       return newOpen
     })
 
-    // Remove from URL after animation completes
+    // Remove from URL after animation completes (250ms spring animation)
     setTimeout(() => {
       if (level === drawerStack.length - 1) {
         // Closing the top drawer
@@ -194,7 +225,7 @@ export function DrawerStack({
           return newSet
         })
       }, 50)
-    }, 300)
+    }, 250)
   }
 
   // Listen for animated close events
@@ -230,7 +261,6 @@ export function DrawerStack({
   return (
     <>
       {drawerStack.map((drawer, index) => {
-        const isClosing = closingDrawers.has(index)
         const isDragging = draggingDrawers.has(index)
 
         // Calculate effective stack excluding closing drawers
@@ -246,7 +276,7 @@ export function DrawerStack({
         return (
           <Drawer.Root
             key={drawer.id}
-            open={openDrawers[index] || false}
+            open={openDrawers[index] === true}
             onOpenChange={(open) => {
               if (!open) {
                 handleDrawerClose(index)
@@ -283,10 +313,11 @@ export function DrawerStack({
                   zIndex: zIndex + 1,
                   // Remove focus ring
                   outline: "none",
-                  // If closing or dragging, don't apply any custom transforms - let Vaul handle it
-                  transform:
-                    isClosing || isDragging
-                      ? "none"
+                  // Control positioning: offscreen when not open, stack position when open
+                  transform: isDragging
+                    ? "none"
+                    : !openDrawers[index]
+                      ? "translateY(100%)" // Offscreen when closed
                       : `translateY(${
                           (effectiveStack.length - 1 - effectiveIndex) *
                           -STACK_GAP
@@ -295,11 +326,11 @@ export function DrawerStack({
                           (effectiveStack.length - 1 - effectiveIndex) *
                             STACK_SQUEEZE
                         })`,
-                  // Only apply transition when not closing or dragging
-                  transition:
-                    isClosing || isDragging
-                      ? "none"
-                      : "transform 300ms ease-out",
+                  // Apply transition unless dragging
+                  // Spring animation: snappy start with momentum, smooth settle (like framer-motion spring)
+                  transition: isDragging
+                    ? "none"
+                    : "transform 250ms cubic-bezier(0.68, 0, 0.265, 1)",
                 }}
                 onPointerDownOutside={(event: any) => {
                   const toastContainer = document.querySelector(
@@ -314,6 +345,13 @@ export function DrawerStack({
                     originalTarget &&
                     toastContainer.contains(originalTarget as Node)
                   ) {
+                    event.preventDefault()
+                  } else if (index === drawerStack.length - 1) {
+                    // Only the top drawer should respond to outside clicks
+                    event.preventDefault()
+                    handleDrawerClose(index)
+                  } else {
+                    // Lower drawers should ignore outside clicks
                     event.preventDefault()
                   }
                 }}
@@ -330,6 +368,9 @@ export function DrawerStack({
                     originalTarget &&
                     toastContainer.contains(originalTarget as Node)
                   ) {
+                    event.preventDefault()
+                  } else {
+                    // Always prevent default to avoid the drawer closing itself
                     event.preventDefault()
                   }
                 }}

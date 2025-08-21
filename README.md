@@ -1,6 +1,6 @@
 # iOS Card-Style Drawer Stack
 
-A React component for creating iOS-style stacked drawer navigation using React Router and Vaul.
+A React component for creating iOS-style stacked drawer navigation using React Router.
 
 Works in tandem with normal navigation - use full-page navigation for primary flows, or peek at routes with stackable drawers for quick previews.
 
@@ -15,12 +15,6 @@ Demo: https://x.com/Dan_The_Goodman/status/1938357207424503843
 - 🔗 **URL-based state** - Drawer stack persists in query parameters
 - ⚡ **Smooth animations** - Natural enter/exit animations with simultaneous transitions
 - 📱 **Multiple dismiss methods** - Close button, background click, or drag-to-dismiss
-
-## Installation
-
-```bash
-npm install vaul
-```
 
 ## Basic Usage
 
