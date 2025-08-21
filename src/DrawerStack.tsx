@@ -207,7 +207,11 @@ export function DrawerStack({
       return newOpen
     })
 
-    // Remove from URL after animation completes (250ms spring animation)
+    // Remove from URL after animation completes
+    // Add extra buffer for Safari iOS to prevent animation glitches
+    const isSafariIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    const animationDuration = isSafariIOS ? 300 : 250
+
     setTimeout(() => {
       if (level === drawerStack.length - 1) {
         // Closing the top drawer
@@ -225,7 +229,7 @@ export function DrawerStack({
           return newSet
         })
       }, 50)
-    }, 250)
+    }, animationDuration)
   }
 
   // Listen for animated close events
@@ -313,15 +317,18 @@ export function DrawerStack({
                   zIndex: zIndex + 1,
                   // Remove focus ring
                   outline: "none",
+                  // Enable hardware acceleration for Safari iOS
+                  willChange: "transform",
                   // Control positioning: offscreen when not open, stack position when open
+                  // Safari iOS needs translateZ to enable hardware acceleration
                   transform: isDragging
                     ? "none"
                     : !openDrawers[index]
-                      ? "translateY(100%)" // Offscreen when closed
-                      : `translateY(${
+                      ? "translate3d(0, 100%, 0)" // Offscreen when closed (use 3d for Safari)
+                      : `translate3d(0, ${
                           (effectiveStack.length - 1 - effectiveIndex) *
                           -STACK_GAP
-                        }px) scale(${
+                        }px, 0) scale(${
                           1 -
                           (effectiveStack.length - 1 - effectiveIndex) *
                             STACK_SQUEEZE
@@ -333,6 +340,9 @@ export function DrawerStack({
                     : "transform 250ms cubic-bezier(0.68, 0, 0.265, 1)",
                 }}
                 onPointerDownOutside={(event: any) => {
+                  // Always prevent default to stop the drawer from closing itself
+                  event.preventDefault()
+
                   const toastContainer = document.querySelector(
                     "[data-toast-container]"
                   ) as HTMLElement | null
@@ -345,15 +355,12 @@ export function DrawerStack({
                     originalTarget &&
                     toastContainer.contains(originalTarget as Node)
                   ) {
-                    event.preventDefault()
+                    return
                   } else if (index === drawerStack.length - 1) {
                     // Only the top drawer should respond to outside clicks
-                    event.preventDefault()
                     handleDrawerClose(index)
-                  } else {
-                    // Lower drawers should ignore outside clicks
-                    event.preventDefault()
                   }
+                  // Lower drawers do nothing
                 }}
                 onInteractOutside={(event: any) => {
                   const toastContainer = document.querySelector(
