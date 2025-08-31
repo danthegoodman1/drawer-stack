@@ -6,6 +6,9 @@ Works in tandem with normal navigation - use full-page navigation for primary fl
 
 Demo: https://x.com/Dan_The_Goodman/status/1938357207424503843
 
+> [!WARNING]
+> Does not currently support `<Outlet />` within a drawer
+
 ## Features
 
 - 🔗 **Works with existing React Router** - No special changes needed to your routes or components, just a root layout
