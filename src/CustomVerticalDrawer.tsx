@@ -100,9 +100,9 @@ function DrawerOverlay({ className, style }: DrawerOverlayProps) {
 
   return (
     <div
-      className={`${className} ${
-        open ? "opacity-100" : "opacity-0"
-      } ${!open ? "pointer-events-none" : ""}`}
+      className={`${className} ${open ? "opacity-100" : "opacity-0"} ${
+        !open ? "pointer-events-none" : ""
+      }`}
       style={{
         ...style,
         transition: "opacity 250ms cubic-bezier(0.68, 0, 0.265, 1)",
@@ -295,6 +295,24 @@ function DrawerContent({
       const isOverlayClick = target.hasAttribute("data-drawer-overlay")
 
       if (!contentRef.current.contains(target) || isOverlayClick) {
+        // Check if clicking on a dialog (Radix UI dialogs or any element with role="dialog")
+        // This prevents closing the drawer when interacting with dialogs
+        let element: Element | null = target
+        while (element) {
+          // Check for Radix UI dialog indicators
+          if (
+            element.getAttribute("role") === "dialog" ||
+            element.hasAttribute("data-radix-dialog-content") ||
+            element.hasAttribute("data-radix-dialog-overlay") ||
+            // Check for our custom dialog classes
+            element.classList.contains("z-[100]") || // Dialog overlay z-index
+            element.classList.contains("z-[101]") // Dialog content z-index
+          ) {
+            return // Don't close drawer when clicking on dialogs
+          }
+          element = element.parentElement
+        }
+
         // First call the callbacks to allow parent to handle it
         if (onPointerDownOutside) {
           onPointerDownOutside(event)
