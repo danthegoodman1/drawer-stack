@@ -1,6 +1,6 @@
 {
   "name": "drawer-stack",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Drawer stack for React",
   "main": "dist/index.js",
